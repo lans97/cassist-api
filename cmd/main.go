@@ -5,9 +5,13 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/lans97/cassist-api/internal/database"
 )
 
 func main() {
+    database.InitDB()
+    defer database.DB.Close()
+
 	e := echo.New()
 
     e.Use(middleware.Logger())
