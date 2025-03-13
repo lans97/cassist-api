@@ -2,9 +2,11 @@ package database
 
 import (
 	"fmt"
-	"log"
 	"os"
+	"strconv"
 
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 	"github.com/lans97/cassist-api/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -54,3 +56,24 @@ func getDBConfig() DBConfig {
         port,
     }
 }
+
+func Pagination(c echo.Context) func(db *gorm.DB) *gorm.DB {
+    return func (db *gorm.DB) *gorm.DB {
+        limit, err := strconv.Atoi(c.QueryParam("limit"))
+
+        if err != nil {
+            log.Errorf("Error converting 'limit' query parameter: %v", err)
+            return db
+        }
+        page, err := strconv.Atoi(c.QueryParam("page"))
+        if err != nil {
+            log.Errorf("Error converting 'page' query parameter: %v", err)
+            return db
+        }
+
+        offset := page*limit
+
+        return db.Limit(limit).Offset(offset)
+    }
+}
+
