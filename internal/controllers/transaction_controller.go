@@ -10,72 +10,65 @@ import (
 	"gorm.io/gorm"
 )
 
-var Response = models.JSONResponse
-
-// CRUD Operations for user
+// CRUD Operations for transaction
 
 // Create
-func CreateUser(c echo.Context) error {
-	user := models.User{}
-    err := c.Bind(&user)
+func CreateTransaction(c echo.Context) error {
+	transaction := models.Transaction{}
+    err := c.Bind(&transaction)
     if err != nil {
-        return echo.NewHTTPError(http.StatusBadRequest, "Bad request: User struct")
+        return echo.NewHTTPError(http.StatusBadRequest, "Bad request: Transaction struct")
     }
 
-    res := database.DB.Create(&user)
+    res := database.DB.Create(&transaction)
     if res.Error != nil {
         if res.Error == gorm.ErrDuplicatedKey {
             return echo.NewHTTPError(http.StatusConflict, "Duplicate entry")
         }
-            return echo.NewHTTPError(http.StatusInternalServerError, "User creation failed")
+            return echo.NewHTTPError(http.StatusInternalServerError, "Transaction creation failed")
     }
 
-    return Response(c, http.StatusOK, "User created", user)
+    return Response(c, http.StatusOK, "Transaction created", transaction)
 }
 
 // Read
 // By ID
-func GetUserById(c echo.Context) error {
-    user := models.User{}
+func GetTransactionById(c echo.Context) error {
+    transaction := models.Transaction{}
     id := c.Param("id")
 
-    res := database.DB.Where("id = ?", id).First(&user)
+    res := database.DB.Where("id = ?", id).First(&transaction)
     if res.Error != nil {
         if res.Error == gorm.ErrRecordNotFound {
-            return echo.NewHTTPError(http.StatusNotFound, "User not found")
+            return echo.NewHTTPError(http.StatusNotFound, "Transaction not found")
         }
         return echo.NewHTTPError(http.StatusInternalServerError, res.Error)
     }
 
-    return Response(c, http.StatusOK, "User retreived", user)
+    return Response(c, http.StatusOK, "Transaction retreived", transaction)
 }
 
 // Filters and Pagination
-func GetUsers(c echo.Context) error {
-    users := []models.User{}
+func GetTransactions(c echo.Context) error {
+    transactions := []models.Transaction{}
 
     limit := c.QueryParam("limit")
     page := c.QueryParam("page")
 
     // Filters
-    uuid := c.QueryParam("uuid")
-    email := c.QueryParam("email")
-    displayName := c.QueryParam("display_name")
+    moneyBucketID := c.QueryParam("money_bucket_id")
+    categoryID := c.QueryParam("category_id")
 
-    query := database.DB.Model(&models.User{})
+    query := database.DB.Model(&models.Transaction{})
 
     // Filter check
 
-    if uuid != "" {
-        query = query.Where("uuid = ?", uuid)
+    if moneyBucketID != "" {
+        query = query.Where("money_bucket_id = ?", moneyBucketID)
     }
 
-    if email != "" {
-        query = query.Where("email = ?", email)
-    }
-
-    if displayName != "" {
-        query = query.Where("display_name = ?", displayName)
+    if categoryID != "" {
+        query = query.Where("category_id = ?", categoryID)
     }
 
     limit_n := 0
@@ -104,17 +97,17 @@ func GetUsers(c echo.Context) error {
         query = query.Limit(limit_n).Offset(limit_n*page_n)
     }
 
-    res := query.Find(&users)
+    res := query.Find(&transactions)
 
     if res.Error != nil {
         return echo.NewHTTPError(http.StatusInternalServerError, res.Error)
     }
 
-    return Response(c, http.StatusOK, "Users retreived", users)
+    return Response(c, http.StatusOK, "Transactions retreived", transactions)
 }
 
 // Update
-func UpdateUser(c echo.Context) error {
+func UpdateTransaction(c echo.Context) error {
     id := c.Param("id")
 
     var updates map[string]any
@@ -127,23 +120,23 @@ func UpdateUser(c echo.Context) error {
         updates["email_verified"] = false
     }
 
-    res := database.DB.Model(&models.User{}).Where("id = ?", id).Updates(updates)
+    res := database.DB.Model(&models.Transaction{}).Where("id = ?", id).Updates(updates)
     if res.Error != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update user")
+        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update transaction")
     }
 
-    var user models.User
-    database.DB.First(&user, id)
+    var transaction models.Transaction
+    database.DB.First(&transaction, id)
 
-    return Response(c, http.StatusOK, "User updated", user)
+    return Response(c, http.StatusOK, "Transaction updated", transaction)
 }
 
 // Delete
 // Non permanent
-func SoftDeleteUser(c echo.Context) error {
+func SoftDeleteTransaction(c echo.Context) error {
     id := c.Param("id")
 
-    res := database.DB.Delete(&models.User{}, id)
+    res := database.DB.Delete(&models.Transaction{}, id)
     if res.Error != nil {
         return echo.NewHTTPError(http.StatusInternalServerError, res.Error)
     }
@@ -152,10 +145,10 @@ func SoftDeleteUser(c echo.Context) error {
 }
 
 // Permanent
-func HardDeleteUser(c echo.Context) error {
+func HardDeleteTransaction(c echo.Context) error {
     id := c.Param("id")
 
-    res := database.DB.Unscoped().Delete(&models.User{}, id)
+    res := database.DB.Unscoped().Delete(&models.Transaction{}, id)
     if res.Error != nil {
         return echo.NewHTTPError(http.StatusInternalServerError, res.Error)
     }

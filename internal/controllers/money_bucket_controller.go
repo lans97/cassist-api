@@ -10,72 +10,65 @@ import (
 	"gorm.io/gorm"
 )
 
-var Response = models.JSONResponse
-
-// CRUD Operations for user
+// CRUD Operations for money_bucket
 
 // Create
-func CreateUser(c echo.Context) error {
-	user := models.User{}
-    err := c.Bind(&user)
+func CreateMoneyBucket(c echo.Context) error {
+	money_bucket := models.MoneyBucket{}
+    err := c.Bind(&money_bucket)
     if err != nil {
-        return echo.NewHTTPError(http.StatusBadRequest, "Bad request: User struct")
+        return echo.NewHTTPError(http.StatusBadRequest, "Bad request: MoneyBucket struct")
     }
 
-    res := database.DB.Create(&user)
+    res := database.DB.Create(&money_bucket)
     if res.Error != nil {
         if res.Error == gorm.ErrDuplicatedKey {
             return echo.NewHTTPError(http.StatusConflict, "Duplicate entry")
         }
-            return echo.NewHTTPError(http.StatusInternalServerError, "User creation failed")
+            return echo.NewHTTPError(http.StatusInternalServerError, "MoneyBucket creation failed")
     }
 
-    return Response(c, http.StatusOK, "User created", user)
+    return Response(c, http.StatusOK, "MoneyBucket created", money_bucket)
 }
 
 // Read
 // By ID
-func GetUserById(c echo.Context) error {
-    user := models.User{}
+func GetMoneyBucketById(c echo.Context) error {
+    money_bucket := models.MoneyBucket{}
     id := c.Param("id")
 
-    res := database.DB.Where("id = ?", id).First(&user)
+    res := database.DB.Where("id = ?", id).First(&money_bucket)
     if res.Error != nil {
         if res.Error == gorm.ErrRecordNotFound {
-            return echo.NewHTTPError(http.StatusNotFound, "User not found")
+            return echo.NewHTTPError(http.StatusNotFound, "MoneyBucket not found")
         }
         return echo.NewHTTPError(http.StatusInternalServerError, res.Error)
     }
 
-    return Response(c, http.StatusOK, "User retreived", user)
+    return Response(c, http.StatusOK, "MoneyBucket retreived", money_bucket)
 }
 
 // Filters and Pagination
-func GetUsers(c echo.Context) error {
-    users := []models.User{}
+func GetMoneyBuckets(c echo.Context) error {
+    money_buckets := []models.MoneyBucket{}
 
     limit := c.QueryParam("limit")
     page := c.QueryParam("page")
 
     // Filters
-    uuid := c.QueryParam("uuid")
-    email := c.QueryParam("email")
-    displayName := c.QueryParam("display_name")
+    userID := c.QueryParam("user_id")
+    name := c.QueryParam("name")
 
-    query := database.DB.Model(&models.User{})
+    query := database.DB.Model(&models.MoneyBucket{})
 
     // Filter check
 
-    if uuid != "" {
-        query = query.Where("uuid = ?", uuid)
+    if userID != "" {
+        query = query.Where("user_id = ?", userID)
     }
 
-    if email != "" {
-        query = query.Where("email = ?", email)
-    }
-
-    if displayName != "" {
-        query = query.Where("display_name = ?", displayName)
+    if name != "" {
+        query = query.Where("name = ?", name)
     }
 
     limit_n := 0
@@ -104,17 +97,17 @@ func GetUsers(c echo.Context) error {
         query = query.Limit(limit_n).Offset(limit_n*page_n)
     }
 
-    res := query.Find(&users)
+    res := query.Find(&money_buckets)
 
     if res.Error != nil {
         return echo.NewHTTPError(http.StatusInternalServerError, res.Error)
     }
 
-    return Response(c, http.StatusOK, "Users retreived", users)
+    return Response(c, http.StatusOK, "MoneyBuckets retreived", money_buckets)
 }
 
 // Update
-func UpdateUser(c echo.Context) error {
+func UpdateMoneyBucket(c echo.Context) error {
     id := c.Param("id")
 
     var updates map[string]any
@@ -127,23 +120,23 @@ func UpdateUser(c echo.Context) error {
         updates["email_verified"] = false
     }
 
-    res := database.DB.Model(&models.User{}).Where("id = ?", id).Updates(updates)
+    res := database.DB.Model(&models.MoneyBucket{}).Where("id = ?", id).Updates(updates)
     if res.Error != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update user")
+        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update money_bucket")
     }
 
-    var user models.User
-    database.DB.First(&user, id)
+    var money_bucket models.MoneyBucket
+    database.DB.First(&money_bucket, id)
 
-    return Response(c, http.StatusOK, "User updated", user)
+    return Response(c, http.StatusOK, "MoneyBucket updated", money_bucket)
 }
 
 // Delete
 // Non permanent
-func SoftDeleteUser(c echo.Context) error {
+func SoftDeleteMoneyBucket(c echo.Context) error {
     id := c.Param("id")
 
-    res := database.DB.Delete(&models.User{}, id)
+    res := database.DB.Delete(&models.MoneyBucket{}, id)
     if res.Error != nil {
         return echo.NewHTTPError(http.StatusInternalServerError, res.Error)
     }
@@ -152,10 +145,10 @@ func SoftDeleteUser(c echo.Context) error {
 }
 
 // Permanent
-func HardDeleteUser(c echo.Context) error {
+func HardDeleteMoneyBucket(c echo.Context) error {
     id := c.Param("id")
 
-    res := database.DB.Unscoped().Delete(&models.User{}, id)
+    res := database.DB.Unscoped().Delete(&models.MoneyBucket{}, id)
     if res.Error != nil {
         return echo.NewHTTPError(http.StatusInternalServerError, res.Error)
     }
