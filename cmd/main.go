@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/lans97/cassist-api/internal/database"
+	"github.com/lans97/cassist-api/internal/firebase"
 	"github.com/lans97/cassist-api/internal/middlewares"
 	"github.com/lans97/cassist-api/internal/routes"
 	"golang.org/x/time/rate"
@@ -11,11 +12,13 @@ import (
 
 func main() {
     database.InitDB()
+    firebase.InitFirebase()
 
 	e := echo.New()
 
     e.Use(middleware.Logger())
     e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(20))))
+    e.Use(middlewares.FirebaseAuth)
 
     e.HTTPErrorHandler = middlewares.CustomErrorHandler
 
