@@ -5,7 +5,7 @@ import (
 	"github.com/lans97/cassist-api/internal/controllers"
 )
 
-func CategoryRoutes(g *echo.Group) {
+func CategoryAdminRoutes(g *echo.Group) {
     g.POST("", controllers.CreateCategory)
     g.GET("/:id", controllers.GetCategoryById)
     g.GET("", controllers.GetCategories)

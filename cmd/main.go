@@ -22,10 +22,12 @@ func main() {
 
     e.HTTPErrorHandler = middlewares.CustomErrorHandler
 
-    routes.UserRoutes(e.Group("/users"))
-    routes.MoneyBucketRoutes(e.Group("/money_buckets"))
-    routes.CategoryRoutes(e.Group("/categories"))
-    routes.TransactionRoutes(e.Group("/transactions"))
+    adminGroup := e.Group("/admin", middlewares.RequireRole("admin"))
+
+    routes.UserAdminRoutes(adminGroup.Group("/users"))
+    routes.MoneyBucketAdminRoutes(adminGroup.Group("/money_buckets"))
+    routes.CategoryAdminRoutes(adminGroup.Group("/categories"))
+    routes.TransactionAdminRoutes(adminGroup.Group("/transactions"))
 
     e.Logger.Fatal(e.Start(":42069"))
 }

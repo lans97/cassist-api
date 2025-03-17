@@ -5,7 +5,7 @@ import (
 	"github.com/lans97/cassist-api/internal/controllers"
 )
 
-func TransactionRoutes(g *echo.Group) {
+func TransactionAdminRoutes(g *echo.Group) {
     g.POST("", controllers.CreateTransaction)
     g.GET("/:id", controllers.GetTransactionById)
     g.GET("", controllers.GetTransactions)

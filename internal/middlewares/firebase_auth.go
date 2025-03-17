@@ -25,7 +25,7 @@ func FirebaseAuth(next echo.HandlerFunc) echo.HandlerFunc {
         }
 
         var user models.User
-        res := database.DB.Model(&models.User{}).Where("uuid = ?", token.UID).First(&user)
+        res := database.DB.Model(&models.User{}).Where("uuid = ?", token.UID).Preload("Role").First(&user)
         if res.Error != nil {
             userRecord, err := firebase.AuthClient.GetUser(c.Request().Context(), token.UID)
             if err != nil {
@@ -39,6 +39,7 @@ func FirebaseAuth(next echo.HandlerFunc) echo.HandlerFunc {
                 Email: userRecord.Email,
                 DisplayName: userRecord.DisplayName,
                 EmailVerified: &ev,
+                RoleID: 2,
             }
             res := database.DB.Create(&user)
             if res.Error != nil {
@@ -48,6 +49,7 @@ func FirebaseAuth(next echo.HandlerFunc) echo.HandlerFunc {
 
         c.Set("google_uid", user.UUID)
         c.Set("user_id", user.ID)
+        c.Set("role", user.Role.Name)
 
         return next(c)
     }

@@ -5,7 +5,7 @@ import (
 	"github.com/lans97/cassist-api/internal/controllers"
 )
 
-func MoneyBucketRoutes(g *echo.Group) {
+func MoneyBucketAdminRoutes(g *echo.Group) {
 	g.POST("", controllers.CreateMoneyBucket)
 	g.GET("/:id", controllers.GetMoneyBucketById)
 	g.GET("", controllers.GetMoneyBuckets)

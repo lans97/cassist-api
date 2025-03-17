@@ -39,7 +39,7 @@ func GetUserById(c echo.Context) error {
     user := models.User{}
     id := c.Param("id")
 
-    res := database.DB.Where("id = ?", id).First(&user)
+    res := database.DB.Where("id = ?", id).Preload("Role").First(&user)
     if res.Error != nil {
         if res.Error == gorm.ErrRecordNotFound {
             return echo.NewHTTPError(http.StatusNotFound, "User not found")
@@ -60,7 +60,6 @@ func GetUsers(c echo.Context) error {
     // Filters
     uuid := c.QueryParam("uuid")
     email := c.QueryParam("email")
-    displayName := c.QueryParam("display_name")
 
     query := database.DB.Model(&models.User{})
 
@@ -72,10 +71,6 @@ func GetUsers(c echo.Context) error {
 
     if email != "" {
         query = query.Where("email = ?", email)
-    }
-
-    if displayName != "" {
-        query = query.Where("display_name = ?", displayName)
     }
 
     limit_n := 0
@@ -104,7 +99,7 @@ func GetUsers(c echo.Context) error {
         query = query.Limit(limit_n).Offset(limit_n*page_n)
     }
 
-    res := query.Find(&users)
+    res := query.Preload("Role").Find(&users)
 
     if res.Error != nil {
         return echo.NewHTTPError(http.StatusInternalServerError, res.Error)

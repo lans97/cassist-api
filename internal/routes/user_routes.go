@@ -5,7 +5,7 @@ import (
 	"github.com/lans97/cassist-api/internal/controllers"
 )
 
-func UserRoutes(g *echo.Group) {
+func UserAdminRoutes(g *echo.Group) {
     g.POST("", controllers.CreateUser)
     g.GET("/:id", controllers.GetUserById)
     g.GET("", controllers.GetUsers)

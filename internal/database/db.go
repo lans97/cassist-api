@@ -37,7 +37,7 @@ func InitDB() {
 		log.Panicf("Could not open database conection: %v", err)
 	}
 
-    DB.AutoMigrate(&models.User{}, &models.User{}, &models.User{})
+    DB.AutoMigrate(&models.Role{}, &models.User{}, &models.MoneyBucket{}, &models.Category{}, &models.Transaction{})
 }
 
 func getDBConfig() DBConfig {
